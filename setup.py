@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="struct_logging",
-    version="0.0.1",
+    version="0.0.2",
     author="SameSystem",
     author_email="linas.ziedas@samesystem.com",
     description="Struct logging for apps",
@@ -17,6 +17,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+    ],
+    install_requires=[
+        'structlog==21.*',
     ],
     python_requires=">=3.7",
 )
