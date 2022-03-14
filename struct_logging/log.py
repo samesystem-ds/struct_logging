@@ -18,7 +18,7 @@ pre_chain = [
     timestamper,
 ]
 
-handlers = ['development'] if int(os.getenv('DEBUG', 1)) else ['file', 'development']
+handlers = ['development'] if int(os.getenv('DEBUG', 0)) else ['file', 'production']
 log_dict_config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -35,6 +35,7 @@ log_dict_config = {
             },
         },
         "handlers": {
+            "production": {"level": "INFO", "class": "logging.StreamHandler", "formatter": "console"},
             "development": {"level": "DEBUG", "class": "logging.StreamHandler", "formatter": "console"},
             "file": {
                 "level": "DEBUG",
