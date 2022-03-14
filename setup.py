@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="struct_logging",
-    version="0.0.2",
+    version="0.0.3",
     author="SameSystem",
     author_email="linas.ziedas@samesystem.com",
     description="Struct logging for apps",
