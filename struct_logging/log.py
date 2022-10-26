@@ -1,56 +1,65 @@
 import os
 import logging.config
 import structlog
+
 try:
     import gunicorn_cfg as gcfg
 except ImportError:
-    class GcfgObject(object):
+    class GcfgObject:
         pass
     gcfg = GcfgObject()
-    gcfg.strctlog_file = 'structlog.log'
+    gcfg.strctlog_file = os.getenv("STRCTLOG_FILE", "structlog.log")
 
 # proudly copied from https://gist.github.com/airhorns/c2d34b2c823541fc0b32e5c853aab7e7
 
-timestamper = structlog.processors.TimeStamper(fmt="iso", utc=True, key='@timestamp')
+timestamper = structlog.processors.TimeStamper(fmt="iso", utc=True, key="@timestamp")
 pre_chain = [
     # Add the log level and a timestamp to the event_dict if the log entry is not from structlog.
     structlog.stdlib.add_log_level,
     timestamper,
 ]
 
-handlers = ['development'] if int(os.getenv('DEBUG', 0)) else ['file', 'production']
+handlers = ["development"] if int(os.getenv("DEBUG", 0)) else ["file", "production"]
 log_dict_config = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "console": {
-                "()": structlog.stdlib.ProcessorFormatter,
-                "processor": structlog.dev.ConsoleRenderer(colors=False),
-                "foreign_pre_chain": pre_chain,
-            },
-            "json": {
-                "()": structlog.stdlib.ProcessorFormatter,
-                "processor": structlog.processors.JSONRenderer(),
-                "foreign_pre_chain": pre_chain
-            },
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(colors=False),
+            "foreign_pre_chain": pre_chain,
         },
-        "handlers": {
-            "production": {"level": "INFO", "class": "logging.StreamHandler", "formatter": "console"},
-            "development": {"level": "DEBUG", "class": "logging.StreamHandler", "formatter": "console"},
-            "file": {
-                "level": "DEBUG",
-                'class': 'logging.FileHandler',
-                'filename': gcfg.strctlog_file,
-                "formatter": "json"
-            },
+        "json": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.JSONRenderer(),
+            "foreign_pre_chain": pre_chain,
         },
-        "loggers": {
-            "": {
-                "handlers": handlers,
-                "level": "DEBUG",
-                "propagate": True,
-            },
-        }
+    },
+    "handlers": {
+        "production": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+        },
+        "development": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+        },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": gcfg.strctlog_file,
+            "formatter": "json",
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": handlers,
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
 }
 
 logging.config.dictConfig(log_dict_config)
@@ -122,7 +131,8 @@ class GunicornLogger(object):
             request_uri=environ["RAW_URI"],
             status=status,
             response_length=getattr(resp, "sent", None),
-            request_time_seconds="%d.%06d" % (request_time.seconds, request_time.microseconds),
+            request_time_seconds="%d.%06d"
+            % (request_time.seconds, request_time.microseconds),
             pid="<%s>" % os.getpid(),
         )
 
